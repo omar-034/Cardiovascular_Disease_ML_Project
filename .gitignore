@@ -216,11 +216,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
-.data/**
-# Data
-data/
-notebooks/data/
 
-# Data
+# Data & Models
+.data/**
 data/
+data/raw/
+data/processed/
 notebooks/data/
+artifacts/
+models/
+*.joblib
+
+# System
+.DS_Store
+
