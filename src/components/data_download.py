@@ -1,4 +1,3 @@
-import os
 import re
 import subprocess
 from pathlib import Path
@@ -48,7 +47,7 @@ def download_kaggle_data(dataset_id, target_dir=None):
     
     try:
         # Utiliser subprocess pour télécharger avec kaggle CLI
-        result = subprocess.run(
+        subprocess.run(
             [
                 "kaggle",
                 "datasets",
@@ -99,4 +98,3 @@ def get_data_path(relative_path=None):
     if relative_path:
         return str((data_dir / relative_path).resolve())
     return str(data_dir.resolve())
-
