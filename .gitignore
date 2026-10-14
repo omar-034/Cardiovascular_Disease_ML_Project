@@ -230,3 +230,7 @@ models/
 # System
 .DS_Store
 
+# Internal Docs & Checklists
+CHECKLIST_COMMITS.md
+RAPPORT_CONFORMITE_TYPES_DONNEES.md
+
