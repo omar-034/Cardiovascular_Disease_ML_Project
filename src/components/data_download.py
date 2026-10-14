@@ -1,6 +1,11 @@
 import os
+import re
 import subprocess
 from pathlib import Path
+
+
+DATASET_ID_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+
 
 def download_kaggle_data(dataset_id, target_dir=None):
     """
@@ -15,6 +20,11 @@ def download_kaggle_data(dataset_id, target_dir=None):
         str: Chemin absolu du répertoire de téléchargement
     """
     
+    if not isinstance(dataset_id, str) or not DATASET_ID_PATTERN.fullmatch(dataset_id.strip()):
+        raise ValueError("dataset_id doit respecter le format 'owner/dataset-name'.")
+
+    dataset_id = dataset_id.strip()
+
     # Si target_dir n'est pas spécifié, utiliser le répertoire par défaut
     if target_dir is None:
         # Trouver le répertoire racine du projet
@@ -39,19 +49,32 @@ def download_kaggle_data(dataset_id, target_dir=None):
     try:
         # Utiliser subprocess pour télécharger avec kaggle CLI
         result = subprocess.run(
-            f"kaggle datasets download -d {dataset_id} -p {target_dir} --unzip",
-            shell=True,
+            [
+                "kaggle",
+                "datasets",
+                "download",
+                "-d",
+                dataset_id,
+                "-p",
+                str(target_dir),
+                "--unzip",
+            ],
+            shell=False,
             capture_output=True,
-            text=True
+            text=True,
+            check=True,
+            timeout=300,
         )
-        
-        if result.returncode == 0:
-            print(f"✅ Dataset téléchargé avec succès dans {target_dir}")
-        else:
-            print(f"❌ Erreur lors du téléchargement:")
-            print(f"   {result.stderr}")
-            raise RuntimeError(f"Erreur Kaggle: {result.stderr}")
-    
+
+        print(f"✅ Dataset téléchargé avec succès dans {target_dir}")
+
+    except subprocess.TimeoutExpired as e:
+        print("❌ Erreur: délai dépassé pendant le téléchargement Kaggle.")
+        raise RuntimeError("Le téléchargement Kaggle a dépassé le délai autorisé.") from e
+    except subprocess.CalledProcessError as e:
+        print("❌ Erreur lors du téléchargement:")
+        print(f"   {e.stderr}")
+        raise RuntimeError(f"Erreur Kaggle: {e.stderr}") from e
     except Exception as e:
         print(f"❌ Erreur: {str(e)}")
         raise
@@ -76,5 +99,4 @@ def get_data_path(relative_path=None):
     if relative_path:
         return str((data_dir / relative_path).resolve())
     return str(data_dir.resolve())
-
 
