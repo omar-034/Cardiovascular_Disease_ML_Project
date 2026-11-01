@@ -8,9 +8,8 @@ def get_requirements(file_path: str) -> List[str]:
     This function will return a list of requirements from the given file path.
     '''
     requirements = []
-    with open(file_path, encoding='utf-8-sig') as file_obj:
-        requirements = file_obj.readlines()
-        requirements = [req.strip() for req in requirements]
+    with open(file_path, encoding='utf-8') as file_obj:
+        requirements = [line.strip() for line in file_obj if line.strip() and not line.strip().startswith('#')]
 
         if HYPHEN_E_DOT in requirements:
             requirements.remove(HYPHEN_E_DOT)
