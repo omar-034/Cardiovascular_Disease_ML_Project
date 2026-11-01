@@ -4,7 +4,6 @@ Orchestre l'ingestion des données, la transformation/feature engineering,
 et l'entraînement/sélection du modèle champion avec son seuil clinique optimal.
 """
 
-import sys
 from src.exception import CustomException
 from src.logger import logger
 from src.components.data_ingestion import DataIngestion
@@ -69,7 +68,7 @@ class TrainPipeline:
             return metrics
 
         except Exception as e:
-            logger.error("❌ Échec lors de l'exécution du TrainPipeline.")
+            logger.error("[FAILED] Echec lors de l'execution du TrainPipeline.")
             raise CustomException(e)
 
 

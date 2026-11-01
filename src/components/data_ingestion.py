@@ -1,12 +1,20 @@
+"""
+Module d'ingestion des données cliniques (Data Ingestion).
+Charge le dataset brut, valide l'intégrité, supprime les doublons,
+et partitionne de manière stratifiée en jeux d'entraînement (80%) et de test (20%).
+"""
+
 import os
-import sys
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from src.exception import CustomException
 from src.logger import logger
+
+# Détermination dynamique de la racine du projet
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 @dataclass
@@ -14,10 +22,10 @@ class DataIngestionConfig:
     """
     Configuration des chemins d'accès pour les artefacts d'ingestion de données.
     """
-    artifacts_dir: str = os.path.join(os.getcwd(), "artifacts")
-    raw_data_path: str = os.path.join(os.getcwd(), "artifacts", "raw.csv")
-    train_data_path: str = os.path.join(os.getcwd(), "artifacts", "train.csv")
-    test_data_path: str = os.path.join(os.getcwd(), "artifacts", "test.csv")
+    artifacts_dir: str = str(PROJECT_ROOT / "artifacts")
+    raw_data_path: str = str(PROJECT_ROOT / "artifacts" / "raw.csv")
+    train_data_path: str = str(PROJECT_ROOT / "artifacts" / "train.csv")
+    test_data_path: str = str(PROJECT_ROOT / "artifacts" / "test.csv")
     test_size: float = 0.20
     random_state: int = 42
 
@@ -46,10 +54,10 @@ class DataIngestion:
         try:
             # 1. Recherche robuste du fichier source
             possible_source_paths = [
+                str(PROJECT_ROOT / "data" / "cardiovascular.csv"),
+                str(PROJECT_ROOT / "notebooks" / "data" / "cardiovascular.csv"),
                 os.path.join(os.getcwd(), "data", "cardiovascular.csv"),
-                os.path.join(os.getcwd(), "notebooks", "data", "cardiovascular.csv"),
-                os.path.join(os.getcwd(), "..", "data", "cardiovascular.csv"),
-                os.path.join(os.getcwd(), "..", "notebooks", "data", "cardiovascular.csv")
+                os.path.join(os.getcwd(), "notebooks", "data", "cardiovascular.csv")
             ]
 
             source_path = next((p for p in possible_source_paths if os.path.exists(p)), None)
@@ -115,4 +123,3 @@ if __name__ == "__main__":
     train_path, test_path = ingestion.initiate_data_ingestion()
     print(f"Train Data Path: {train_path}")
     print(f"Test Data Path:  {test_path}")
-

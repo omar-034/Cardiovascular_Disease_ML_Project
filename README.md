@@ -1,172 +1,234 @@
-# 🫀 CardioScan AI — Système Expert de Dépistage et Prédiction du Risque Cardiovasculaire
+# 🫀 CardioScan AI — Système Expert de Dépistage et Stratification du Risque Cardiovasculaire
 
-[![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
-[![ML Framework](https://img.shields.io/badge/Scikit--Learn-1.4+-orange.svg)](https://scikit-learn.org/)
-[![UI](https://img.shields.io/badge/Streamlit-1.66+-FF4B4B.svg)](https://streamlit.io/)
-[![Recall](https://img.shields.io/badge/Clinical%20Recall-100%25-brightgreen.svg)]()
-[![ROC-AUC](https://img.shields.io/badge/ROC--AUC-0.9999-success.svg)]()
-[![Status](https://img.shields.io/badge/Status-Production--Ready-blueviolet.svg)]()
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.4+-F7931E.svg?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.66+-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Clinical Recall](https://img.shields.io/badge/Recall%20(Sensibilit%C3%A9)-100%25-00C853.svg?style=flat-square)]()
+[![ROC-AUC](https://img.shields.io/badge/ROC--AUC-0.9999-00E676.svg?style=flat-square)]()
+[![Accuracy](https://img.shields.io/badge/Exactitude-99.00%25-00B0FF.svg?style=flat-square)]()
+[![Status](https://img.shields.io/badge/Statut-Production--Ready-6200EA.svg?style=flat-square)]()
+[![License](https://img.shields.io/badge/Licence-MIT-blue.svg?style=flat-square)](LICENSE)
 
-> **CardioScan AI** est une solution intégrale de Machine Learning et un système d'aide à la décision clinique conçu pour l'évaluation et la stratification du risque de maladies cardiovasculaires et coronariennes à partir de biomarqueurs physiologiques et électrocardiographiques d'effort.
-
----
-
-## 📑 Table des Matières
-- [1. Contexte Médical & Objectifs](#-1-contexte-médical--objectifs)
-- [2. Architecture & Cycle de Vie MLOps](#-2-architecture--cycle-de-vie-mlops)
-- [3. Résultats & Métriques de Performance](#-3-résultats--métriques-de-performance)
-- [4. Ingénierie des Caractéristiques Cliniques](#-4-ingénierie-des-caractéristiques-cliniques)
-- [5. Arborescence du Projet](#-5-arborescence-du-projet)
-- [6. Installation & Démarrage Rapide](#-6-installation--démarrage-rapide)
-- [7. Utilisation de l'Application Web Streamlit](#-7-utilisation-de-lapplication-web-streamlit)
-- [8. Pipeline de Réentraînement & Inférence Automatisée](#-8-pipeline-de-réentraînement--inférence-automatisée)
-- [9. Auteur & Licence](#-9-auteur--licence)
+> **CardioScan AI** est une solution complète de Machine Learning de qualité médicale et un système d'aide à la décision clinique (SADC) conçu pour le dépistage précoce, la stratification du risque et l'évaluation pronostique des maladies coronariennes et cardiopathies ischémiques à partir de biomarqueurs physiologiques, biologiques et électrocardiographiques d'effort.
 
 ---
 
-## 🩺 1. Contexte Médical & Objectifs
-
-Les cardiopathies ischémiques représentent la première cause de mortalité dans le monde. Dans le domaine du diagnostic médical assisté par ordinateur, le **coût d'une erreur est hautement asymétrique** :
-- **Faux Positif (FP)** : Déclenche des examens complémentaires de réassurance (échographie, bilan lipidique) sans danger vital immédiat.
-- **Faux Négatif (FN)** : Renvoie un patient coronarien chez lui sans prise en charge, augmentant drastiquement le risque d'infarctus du myocarde (IDM) ou d'arrêt cardiaque.
-
-**Objectif Prioritaire :** Maximiser la sensibilité (**Recall = 100%**) et le **$F_2$-Score** (qui double le poids accordé au Rappel par rapport à la Précision), tout en maintenant une excellente spécificité et une exactitude globale supérieure à 98%.
-
----
-
-## 🏗️ 2. Architecture & Cycle de Vie MLOps
-
-Le projet a été mené selon un cycle de développement modulaire et test-driven, formalisé par 6 phases de travail indépendantes :
-
-```
-[ Données Cliniques Brutes ]
-            │
-            ▼ (Phase 1: EDA)
-[ 4 Notebooks Exploratoires ] ──> Détection anomalies (cholestérol nul, pente ST hors plage)
-            │
-            ▼ (Phase 2: Ingestion & Feature Engineering)
-[ ClinicalFeatureEngineer ] ──> Imputation conditionnelle + 3 Biomarqueurs dérivés
-            │
-            ▼ (Phase 2: Prétraitement Anti-Fuite)
-[ ColumnTransformer ] ──> RobustScaler (numériques) + OneHot (nominales) + StandardScaler (ordinales)
-            │
-            ▼ (Phase 3: Entraînement & Benchmark)
-[ 5-Fold Stratified CV ] ──> Benchmark de 5 modèles (HistGradient, RF, XGB, LogReg, SVC)
-            │
-            ▼ (Phase 3: Calibration du Seuil)
-[ Optimal Threshold θ* ] ──> Calibration post-modèle orientée F2-Score (Recall = 100%)
-            │
-            ▼ (Phase 4: Pipelines de Production)
-[ TrainPipeline & PredictPipeline ] ──> Sérialisation / Inférence unitaire & batch
-            │
-            ▼ (Phase 5: Interface Utilisateur)
-[ Application Streamlit (app.py) ] ──> UI clinique responsive avec profil type & export CSV
-```
+## 📑 Sommaire
+1. [Contexte Médical & Problématique Clinique](#-1-contexte-médical--problématique-clinique)
+2. [Indicateurs Clés de Performance (KPIs)](#-2-indicateurs-clés-de-performance-kpis)
+3. [Benchmark Multi-Modèles & Validation Croisée](#-3-benchmark-multi-modèles--validation-croisée)
+4. [Ingénierie des Caractéristiques Cliniques](#-4-ingénierie-des-caractéristiques-cliniques)
+5. [Architecture MLOps & Prévention des Fuites (Data Leakage)](#-5-architecture-mlops--prévention-des-fuites-data-leakage)
+6. [Application Web Clinique Streamlit](#-6-application-web-clinique-streamlit)
+7. [Structure du Répertoire](#-7-structure-du-répertoire)
+8. [Installation & Démarrage Rapide](#-8-installation--démarrage-rapide)
+9. [Pipelines de Production (CLI)](#-9-pipelines-de-production-cli)
+10. [Éthique, RGPD & Avertissement Réglementaire](#-10-éthique-rgpd--avertissement-réglementaire)
+11. [Auteur & Licence](#-11-auteur--licence)
 
 ---
 
-## 📊 3. Résultats & Métriques de Performance
+## 🩺 1. Contexte Médical & Problématique Clinique
 
-### Benchmark en Validation Croisée (Stratified 5-Fold CV)
+Les cardiopathies ischémiques demeurent la première cause de mortalité à l'échelle mondiale. En cardiologie diagnostique, la matrice des coûts d'erreur est **hautement asymétrique** :
 
-| Modèle | Recall Moyen | $F_2$-Score Moyen | ROC-AUC Moyen | Accuracy Moyenne |
-| :--- | :---: | :---: | :---: | :---: |
-| 🏆 **HistGradientBoosting** | **98.49%** | **0.9807** | **0.9950** | **97.00%** |
-| Random Forest | 98.06% | 0.9755 | 0.9927 | 96.25% |
-| XGBoost | 97.62% | 0.9724 | 0.9916 | 96.12% |
-| Logistic Regression | 97.41% | 0.9728 | 0.9918 | 96.62% |
-| SVC (Kernel RBF) | 97.41% | 0.9720 | 0.9928 | 96.38% |
+- **Faux Positif (FP)** : Déclenche des explorations de seconde intention (scintigraphie myocardique, coroscanner) sans engager le pronostic vital du patient.
+- **Faux Négatif (FN)** : Renvoie au domicile un patient coronarien sévère sans traitement, avec un risque immédiat d'infarctus du myocarde (IDM) ou d'arrêt cardio-circulatoire.
 
-### Performance Finale sur le Jeu de Test Indépendant (Holdout 20%)
+### Le Dilemme de l'Exactitude Classique
+Dans les applications cliniques, une exactitude globale (*Accuracy*) de 95% est trompeuse si elle masque 5% de faux négatifs mortels. C'est pourquoi **CardioScan AI** a été conçu avec la règle clinique cardinale :
+$$\text{Sensibilité (Recall)} \rightarrow 100\% \quad \text{et optimisation du } F_2\text{-Score}$$
 
-Après calibration du seuil clinique optimal $\theta^* = 0.10$ :
-- **Rappel Clinique (Recall / Sensibilité) : 100.0%** (0 Faux Négatif sur l'échantillon test)
-- **$F_2$-Score Clinique : 0.9966**
-- **Exactitude Globale (Accuracy) : 99.00%**
-- **Précision : 98.31%**
-- **Aire sous la courbe ROC-AUC : 0.9999**
+Le **$F_2$-Score** accorde un poids quatre fois supérieur au Rappel par rapport à la Précision :
+$$F_\beta = (1 + \beta^2) \frac{\text{Précision} \times \text{Rappel}}{(\beta^2 \times \text{Précision}) + \text{Rappel}} \quad \text{avec } \beta = 2$$
+
+---
+
+## 🎯 2. Indicateurs Clés de Performance (KPIs)
+
+Sur le jeu de test indépendant (**Holdout de 20% inviolé**, 200 patients), après calibration du seuil de décision clinique ($\theta^* = 0.10$) :
+
+| Métrique Clinique | Résultat Modèle Champion | Interprétation Médicale |
+| :--- | :---: | :--- |
+| **Rappel (Recall / Sensibilité)** | **100.0%** | **Zéro faux négatif** : 100% des patients coronariens détectés. |
+| **$F_2$-Score Clinique** | **0.9966** | Équilibre optimal avec priorité absolue accordée à la détection des malades. |
+| **ROC-AUC (Aire sous la courbe)** | **0.9999** | Capacité de discrimination quasi-absolue entre sains et pathologiques. |
+| **Exactitude Globale (Accuracy)** | **99.00%** | Taux global de prédictions correctes sur la cohorte d'évaluation. |
+| **Précision Diagnostique** | **98.31%** | Taux extrêmement faible de fausses alertes (spécificité préservée). |
+| **Seuil Décisionnel Dédié ($\theta^*$)** | **0.10** | Seuil calibré par optimisation F2 (vs seuil conventionnel 0.50). |
+
+---
+
+## 🏆 3. Benchmark Multi-Modèles & Validation Croisée
+
+Une validation croisée stratifiée à 5 plis (**Stratified 5-Fold Cross-Validation**) a été menée pour comparer 5 architectures d'apprentissage supervisé :
+
+| Rang | Modèle Algorithmique | Recall Moyen | $F_2$-Score Moyen | ROC-AUC Moyen | Accuracy Moyenne | Précision Moyenne |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: |
+| 🥇 | **HistGradientBoosting** *(Champion)* | **98.49% ± 0.53%** | **0.9807 ± 0.40%** | **0.9950 ± 0.61%** | **97.00%** | **96.47%** |
+| 🥈 | **Random Forest Classifier** | 98.06% ± 1.06% | 0.9755 ± 0.99% | 0.9927 ± 0.67% | 96.25% | 95.62% |
+| 🥉 | **XGBoost Classifier** | 97.62% ± 1.87% | 0.9724 ± 1.58% | 0.9916 ± 1.18% | 96.12% | 95.78% |
+| 4 | **Régression Logistique (L2)** | 97.41% ± 1.63% | 0.9728 ± 1.41% | 0.9918 ± 0.70% | 96.62% | 96.79% |
+| 5 | **Support Vector Machine (RBF)** | 97.41% ± 1.48% | 0.9720 ± 1.22% | 0.9928 ± 0.47% | 96.38% | 96.39% |
+
+### Pourquoi HistGradientBoosting est Champion ?
+1. **Modélisation non linéaire supérieure** : Capture les interactions complexes entre le sous-décalage du segment ST (`oldpeak`) et la réserve cardiaque.
+2. **Robustesse aux distributions asymétriques** : Traite naturellement les variables d'épreuve d'effort sans instabilité numérique.
+3. **Sensibilité diagnostique maximale** : Présente la plus faible variance d'erreur de rappel ($\pm 0.53\%$).
 
 ---
 
 ## 🔬 4. Ingénierie des Caractéristiques Cliniques
 
-Le module `ClinicalFeatureEngineer` enrichit les 12 biomarqueurs de base avec des indices physiologiques de référence :
+Le transformateur personnalisé [`ClinicalFeatureEngineer`](src/components/feature_engineering.py) synthétise de nouveaux biomarqueurs validés par la littérature cardiologique :
 
-1. **Ratio de Réserve Cardiaque (`hr_reserve_ratio`)** :
-   $$\text{hr\_reserve\_ratio} = \frac{\text{maxheartrate}}{220 - \text{age}}$$
-   Évalue la capacité chronotrope du myocarde sous stress.
-2. **Indice de Charge Ischémique (`ischemia_burden_index`)** :
-   $$\text{ischemia\_burden\_index} = \text{oldpeak} \times \mathbb{I}(\text{exerciseangia} = 1)$$
-   Combine l'expression symptomatique de l'angine et la sévérité du sous-décalage électrique ST.
-3. **Proxy de Rigidité Vasculaire (`vascular_stiffness_proxy`)** :
-   $$\text{vascular\_stiffness\_proxy} = \frac{\text{restingBP}}{\text{age} + 1}$$
-   Reflète la charge hémodynamique normalisée par l'âge physiologique.
-4. **Correction Biologique du Cholestérol Nul** :
-   Remplacement des zéros physiologiquement impossibles (`serumcholestrol == 0`) par la médiane conditionnelle calculée exclusivement sur le sous-ensemble d'apprentissage (garantie stricte d'absence de fuite d'information).
+### 1. Ratio de Réserve Chronotrope (`hr_reserve_ratio`)
+$$\text{hr\_reserve\_ratio} = \frac{\text{maxheartrate}}{220 - \text{age}}$$
+*Mesure la capacité du cœur à mobiliser son potentiel chronotrope à l'effort maximal. Un ratio effondré (< 0.85) est un prédicteur fort d'insuffisance coronaire.*
+
+### 2. Indice de Charge Ischémique (`ischemia_burden_index`)
+$$\text{ischemia\_burden\_index} = \text{oldpeak} \times \mathbb{I}(\text{exerciseangia} = 1)$$
+*Quantifie la sévérité clinique en combinant l'altération électrique objective (dépression du segment ST en mm) et la symptomatologie subjective (angine induite par l'effort).*
+
+### 3. Proxy de Rigidité Artérielle & Surcharge Vasculaire (`vascular_stiffness_proxy`)
+$$\text{vascular\_stiffness\_proxy} = \frac{\text{restingBP} \times \text{age}}{100}$$
+*Estime l'accumulation du stress pariétal artériel combinant la charge hypertensive et le vieillissement vasculaire.*
+
+### 4. Traitement Anti-Fuite du Cholestérol Nul
+- **Observation biologique** : Un taux de `serumcholestrol == 0 mg/dL` est incompatible avec la vie humaine (erreur d'enregistrement ou valeur non renseignée).
+- **Correction** : Remplacement des zéros par `NaN`, puis imputation par la médiane apprise **strictement sur le sous-ensemble d'apprentissage**, prévenant toute fuite d'information.
 
 ---
 
-## 📁 5. Arborescence du Projet
+## 🛡️ 5. Architecture MLOps & Prévention des Fuites (Data Leakage)
+
+Le pipeline de prétraitement est scellé dans un `ColumnTransformer` hermétique :
 
 ```
+                                  [ Données Brutes ]
+                                          │
+                                          ▼
+                            [ Split Stratifié 80 / 20 ]
+                           ┌──────────────┴──────────────┐
+                           ▼                             ▼
+                    [ TRAIN SET ]                  [ TEST SET ]
+                           │                        (Inviolé)
+                           ▼                             │
+            [ ClinicalFeatureEngineer ]                  │
+                           │                             │
+                           ▼                             │
+               [ ColumnTransformer ]                     │
+          ┌────────────────┼────────────────┐            │
+          ▼                ▼                ▼            │
+    [ Continues ]     [ Nominales ]    [ Ordinales ]     │
+     Imputer(Med)     Imputer(Mode)    Imputer(Mode)     │
+          +                +                +            │
+     RobustScaler       OneHot        StandardScaler     │
+          │                │                │            │
+          └────────────────┼────────────────┘            │
+                           │                             │
+                           ▼ (Fit & Transform)           ▼ (Transform ONLY)
+                    [ X_train_scaled ]             [ X_test_scaled ]
+                           │                             │
+                           ▼                             │
+                  [ 5-Fold Strat CV ]                    │
+                           │                             │
+                           ▼                             │
+             [ Calibration Seuil θ* = 0.10 ]             │
+                           │                             │
+                           ▼                             ▼
+                     [ Modèle Champion ] ───────> [ Évaluation Finale ]
+                     (HistGradient)              (Recall = 100%)
+```
+
+---
+
+## 🖥️ 6. Application Web Clinique Streamlit
+
+L'interface graphique [`app.py`](app.py) offre une expérience ergonomique de niveau professionnel pour les praticiens :
+
+### Fonctionnalités Principales :
+1. **Évaluation Individuelle en Temps Réel** :
+   - Formulaire clinique structuré en 2 volets : *Données Démographiques & Biologiques* vs *Symptomatologie & Épreuve d'Effort*.
+   - Calcul interactif immédiat des 3 biomarqueurs dérivés (`hr_reserve_ratio`, `ischemia_burden_index`, `vascular_stiffness_proxy`).
+   - Jauge de risque visuelle et recommandation médicale graduée (*Très Faible*, *Vigilance*, *Élevé*, *Urgence Critique*).
+2. **Chargement Rapide de Profils Types (1-Clic)** :
+   - 🟢 **Profil Témoin Sain** : 25 ans, femme, biomarqueurs optimaux.
+   - 🟡 **Profil à Risque Modéré** : 55 ans, homme, anomalies légères de l'onde ST.
+   - 🔴 **Profil Ischémique Critique** : 76 ans, homme, angine d'effort, dépression ST 3.2 mm, 2 vaisseaux atteints.
+3. **Dépistage par Cohorte (Batch CSV)** :
+   - Téléversement d'un fichier CSV multi-patients.
+   - Modèle CSV d'exemple téléchargeable en 1 clic.
+   - Inférence vectorisée, statistiques d'incidence de cohorte et export du rapport CSV enrichi.
+4. **Gouvernance & Auditabilité du Modèle** :
+   - Tableau comparatif complet de la validation croisée 5-Fold.
+   - Justification de la calibration du seuil orientée zéro faux négatif.
+
+---
+
+## 📁 7. Structure du Répertoire
+
+```text
 Cardiovascular Disease/
-├── artifacts/                           # Modèles et métriques sérialisés (non suivis par Git)
-│   ├── model.pkl                        # Modèle champion sérialisé
-│   ├── preprocessor.pkl                 # Pipeline de transformation scellée
-│   ├── threshold.json                   # Seuil clinique calibré (θ*)
-│   ├── metrics.json                     # Métriques de validation et de test
-│   └── model_comparison.csv             # Tableau comparatif du benchmark
+├── artifacts/                           # Modèles, préprocesseurs et métriques sérialisés
+│   ├── model.pkl                        # Modèle champion HistGradientBoosting sérialisé
+│   ├── preprocessor.pkl                 # Pipeline scikit-learn complète scellée
+│   ├── threshold.json                   # Seuil clinique calibré (θ* = 0.10)
+│   ├── metrics.json                     # Métriques officielles du jeu de test
+│   ├── model_comparison.csv             # Tableau benchmark de la validation croisée
+│   ├── train.csv                        # Jeu d'entraînement (800 observations)
+│   ├── test.csv                         # Jeu de test inviolé (200 observations)
+│   └── raw.csv                          # Copie intègre du jeu de données brut
 ├── notebooks/
 │   ├── data/
-│   │   └── cardiovascular.csv           # Données cliniques de référence
-│   ├── 01_Data_overview.ipynb           # Phase 1.1 : Structure et intégrité
-│   ├── 02_Univariate_analysis.ipynb     # Phase 1.2 : Distributions univariées
-│   ├── 03_Bivariate_analysis.ipynb      # Phase 1.3 : Corrélations et relations cibles
-│   ├── 04_Multivariate_analysis.ipynb   # Phase 1.4 : Clusters et ACP
-│   └── 05_Model_Training.ipynb          # Phase 3 : Benchmark & optimisation du seuil
+│   │   └── cardiovascular.csv           # Dataset clinique source (1000 patients)
+│   ├── 01_Data_overview.ipynb           # Phase 1.1 : Structure, types et intégrité
+│   ├── 02_Univariate_analysis.ipynb     # Phase 1.2 : Distributions et détection d'outliers
+│   ├── 03_Bivariate_analysis.ipynb      # Phase 1.3 : Corrélations et relations avec la cible
+│   ├── 04_Multivariate_analysis.ipynb   # Phase 1.4 : Clusters et analyse factorielle
+│   └── 05_Model_Training.ipynb          # Phase 3 : Benchmarking et optimisation de seuil
 ├── src/
-│   ├── __init__.py
-│   ├── exception.py                     # Gestion unifiée des exceptions
-│   ├── logger.py                        # Journalisation horodatée des événements
-│   ├── utils.py                         # Utilitaires de sérialisation d'objets
+│   ├── __init__.py                      # Package source
+│   ├── exception.py                     # Gestion unifiée des exceptions enrichies
+│   ├── logger.py                        # Journalisation horodatée fichier + console
+│   ├── utils.py                         # Utilitaires de sérialisation pickle sécurisés
 │   ├── components/
 │   │   ├── __init__.py
-│   │   ├── data_ingestion.py            # Phase 2 : Découpage stratifié 80/20
-│   │   ├── feature_engineering.py       # Phase 2 : Ingénierie clinique
-│   │   ├── data_transformation.py       # Phase 2 : Préprocesseur scikit-learn
-│   │   └── model_trainer.py             # Phase 3 : Entraîneur et sélection du champion
+│   │   ├── data_ingestion.py            # Phase 2 : Découpage stratifié 80/20 anti-fuite
+│   │   ├── feature_engineering.py       # Phase 2 : Transformateur ClinicalFeatureEngineer
+│   │   ├── data_transformation.py       # Phase 2 : Assemblage du ColumnTransformer
+│   │   └── model_trainer.py             # Phase 3 : Benchmark 5-Fold et tuning de seuil
 │   └── pipeline/
 │       ├── __init__.py
-│       ├── train_pipeline.py            # Phase 4 : Pipeline d'entraînement complet
+│       ├── train_pipeline.py            # Phase 4 : Pipeline d'entraînement complet 1-clic
 │       └── predict_pipeline.py          # Phase 4 : Moteur d'inférence (CustomData)
-├── app.py                               # Phase 5 : Application Web Streamlit
-├── requirements.txt                     # Dépendances minimales sécurisées
-├── setup.py                             # Configuration du packaging Python
-└── README.md                            # Documentation complète du projet
+├── app.py                               # Phase 5 : Interface utilisateur Streamlit
+├── requirements.txt                     # Dépendances minimales sécurisées (0 CVE)
+├── setup.py                             # Métadonnées et packaging du projet Python
+└── README.md                            # Documentation de référence du projet
 ```
 
 ---
 
-## 🚀 6. Installation & Démarrage Rapide
+## 🚀 8. Installation & Démarrage Rapide
 
 ### Prérequis
-- Python 3.10 ou version ultérieure
+- Python 3.10, 3.11, 3.12 ou 3.13
 - Git
 
 ### 1. Cloner le Dépôt
 ```bash
-git clone https://github.com/votre-nom/Cardiovascular_Disease_ML_Project.git
+git clone https://github.com/omar-034/Cardiovascular_Disease_ML_Project.git
 cd "Cardiovascular Disease"
 ```
 
-### 2. Créer et Activer un Environnement Virtuel
-```bash
+### 2. Créer et Activer l'Environnement Virtuel
+```powershell
 # Sous Windows (PowerShell)
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
-# Sous Linux / macOS
+# Sous Linux / macOS (Bash)
 python3 -m venv .venv
 source .venv/bin/activate
 ```
@@ -177,53 +239,40 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
----
-
-## 🖥️ 7. Utilisation de l'Application Web Streamlit
-
-Lancez l'interface graphique interactive avec la commande :
-
+### 4. Lancer l'Application Web
 ```bash
 streamlit run app.py
 ```
-
-L'application s'ouvrira automatiquement à l'adresse : **`http://localhost:8501`**
-
-### Fonctionnalités Clés de l'Application :
-1. **Évaluation Individuelle (Saisie Patient)** :
-   - Formulaire clinique complet organisé par domaines (Démographie / Épreuve d'effort).
-   - Calcul et affichage en temps réel des 3 biomarqueurs dérivés.
-   - Chargement en 1 clic de profils types (*Patient Témoin Sain*, *Risque Modéré*, *Cas Ischémique Critique*).
-   - Diagnostic immédiat, niveau de risque gradué, jauge visuelle et recommandations médicales prioritaires.
-2. **Dépistage par Cohorte (Batch CSV)** :
-   - Téléversement d'un fichier CSV multi-patients.
-   - Modèle CSV d'exemple téléchargeable directement depuis l'application.
-   - Évaluation automatisée, statistiques d'incidence de cohorte et export du rapport CSV enrichi.
-3. **Gouvernance & Transparence MLOps** :
-   - Consultation des métriques de validation croisée et de test.
-   - Explication de la politique de décision clinique et de la minimisation des faux négatifs.
+L'interface s'ouvre automatiquement dans votre navigateur à l'adresse : **`http://localhost:8501`**
 
 ---
 
-## ⚙️ 8. Pipeline de Réentraînement & Inférence Automatisée
+## ⚙️ 9. Pipelines de Production (CLI)
 
-### Exécuter le Réentraînement Complet en 1 Ligne
-Pour relancer l'ingestion, le préprocessing, le benchmark et la calibration du seuil :
+### Réentraînement Complet en 1 Ligne
+Pour relancer l'ingestion, le prétraitement, le benchmark des 5 algorithmes et la calibration du seuil :
 ```bash
 python -m src.pipeline.train_pipeline
 ```
 
-### Tester l'Inférence en Ligne de Commande
-Pour évaluer un patient virtuel avec le moteur `predict_pipeline` :
+### Inférence Unitaire en Ligne de Commande
+Pour tester l'évaluation clinique d'un patient virtuel via le terminal :
 ```bash
 python -m src.pipeline.predict_pipeline
 ```
 
 ---
 
-## 👨‍💻 9. Auteur & Licence
+## ⚖️ 10. Éthique, RGPD & Avertissement Réglementaire
+
+- **Secret Médical & RGPD** : Le système fonctionne en local sans téléversement des données de santé vers des serveurs tiers. L'identifiant patient (`patientid`) est rigoureusement exclu de la modélisation pour garantir la pseudonymisation.
+- **Système d'Aide à la Décision Clinique (SADC)** : Cette application est un outil d'assistance au triage diagnostique destiné aux professionnels de santé. Elle ne dispense pas de la réalisation d'une coronarographie, d'une échocardiographie ou de l'évaluation clinique directe par un médecin cardiologue.
+
+---
+
+## 👨‍💻 11. Auteur & Licence
 
 - **Auteur :** Omar Diop
-- **Email :** od14034@gmail.com
-- **Projet :** Système Expert de Prédiction du Risque Cardiovasculaire
-- **Licence :** Ce projet est distribué sous licence MIT. Consultez le fichier `LICENSE` pour plus de détails.
+- **Email :** [od14034@gmail.com](mailto:od14034@gmail.com)
+- **Dépôt GitHub :** [Cardiovascular_Disease_ML_Project](https://github.com/omar-034/Cardiovascular_Disease_ML_Project)
+- **Licence :** Distribué sous licence **MIT**. Consultez le fichier `LICENSE` pour plus de détails.

@@ -165,7 +165,7 @@ with st.sidebar:
     st.image(
         "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
         caption="CardioScan AI Clinical Suite",
-        use_container_width=True
+        width="stretch"
     )
     
     st.subheader("Performance du Modèle")
@@ -419,7 +419,7 @@ with tab_single:
         theoretical_max_hr = 220 - age
         hr_reserve_ratio = maxheartrate / theoretical_max_hr if theoretical_max_hr > 0 else 1.0
         ischemia_burden = oldpeak * exerciseangia
-        vascular_stiffness = restingBP / (age + 1)
+        vascular_stiffness = (restingBP * age) / 100.0
 
         st.markdown("##### 🔬 Biomarqueurs Dérivés Synthétisés par le Feature Engineering :")
         col_b1, col_b2, col_b3 = st.columns(3)
@@ -430,110 +430,115 @@ with tab_single:
             st.markdown(f"<div class='biomarker-chip'>Charge Ischémique : {ischemia_burden:.2f} mm</div>", unsafe_allow_html=True)
             st.caption("oldpeak × Angine d'effort")
         with col_b3:
-            st.markdown(f"<div class='biomarker-chip'>Rigidité Vasculaire : {vascular_stiffness:.2f} mmHg/an</div>", unsafe_allow_html=True)
-            st.caption("Pression Artérielle / (Âge + 1)")
+            st.markdown(f"<div class='biomarker-chip'>Rigidité Vasculaire : {vascular_stiffness:.2f}</div>", unsafe_allow_html=True)
+            st.caption("(Pression Artérielle x Âge) / 100")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        submit_btn = st.form_submit_button("🫀 Évaluer le Risque Cardiovasculaire du Patient", use_container_width=True, type="primary")
+        submit_btn = st.form_submit_button("🫀 Évaluer le Risque Cardiovasculaire du Patient", width="stretch", type="primary")
 
     # ----------------------------------------------------
     # Traitement & Affichage du Diagnostic
     # ----------------------------------------------------
     if submit_btn:
-        patient_data = CustomData(
-            age=float(age),
-            gender=int(gender),
-            chestpain=int(chestpain),
-            restingBP=float(restingBP),
-            serumcholestrol=float(serumcholestrol),
-            fastingbloodsugar=int(fastingbloodsugar),
-            restingrelectro=int(restingrelectro),
-            maxheartrate=float(maxheartrate),
-            exerciseangia=int(exerciseangia),
-            oldpeak=float(oldpeak),
-            slope=int(slope),
-            noofmajorvessels=int(noofmajorvessels)
-        )
+        try:
+            patient_data = CustomData(
+                age=float(age),
+                gender=int(gender),
+                chestpain=int(chestpain),
+                restingBP=float(restingBP),
+                serumcholestrol=float(serumcholestrol),
+                fastingbloodsugar=int(fastingbloodsugar),
+                restingrelectro=int(restingrelectro),
+                maxheartrate=float(maxheartrate),
+                exerciseangia=int(exerciseangia),
+                oldpeak=float(oldpeak),
+                slope=int(slope),
+                noofmajorvessels=int(noofmajorvessels)
+            )
 
-        df_input = patient_data.get_data_as_data_frame()
-        prediction_output = prediction_engine.predict(df_input)
-        patient_res = prediction_output["patients_evaluated"][0]
+            df_input = patient_data.get_data_as_data_frame()
+            prediction_output = prediction_engine.predict(df_input)
+            patient_res = prediction_output["patients_evaluated"][0]
 
-        prob = patient_res["risk_probability"]
-        prob_pct = patient_res["risk_percentage"]
-        pred_label = patient_res["prediction_label"]
-        risk_level = patient_res["risk_level"]
-        recommendation = patient_res["clinical_recommendation"]
-        threshold_val = patient_res["threshold_applied"]
+            prob = patient_res["risk_probability"]
+            prob_pct = patient_res["risk_percentage"]
+            pred_label = patient_res["prediction_label"]
+            risk_level = patient_res["risk_level"]
+            recommendation = patient_res["clinical_recommendation"]
+            threshold_val = patient_res["threshold_applied"]
 
-        st.markdown("---")
-        st.subheader("📋 Rapport Diagnostique et Évaluation du Risque")
+            st.markdown("---")
+            st.subheader("📋 Rapport Diagnostique et Évaluation du Risque")
 
-        col_res1, col_res2, col_res3 = st.columns([1.5, 1, 1])
-        with col_res1:
-            if patient_res["prediction"] == 1:
-                st.error(f"⚠️ **DIAGNOSTIC : {pred_label.upper()}**")
+            col_res1, col_res2, col_res3 = st.columns([1.5, 1, 1])
+            with col_res1:
+                if patient_res["prediction"] == 1:
+                    st.error(f"⚠️ **DIAGNOSTIC : {pred_label.upper()}**")
+                else:
+                    st.success(f"✅ **DIAGNOSTIC : {pred_label.upper()}**")
+                st.write(f"**Classement Clinique :** {risk_level}")
+
+            with col_res2:
+                st.metric(
+                    label="Probabilité de Risque Ischémique",
+                    value=prob_pct,
+                    delta=f"{(prob - threshold_val) * 100:+.1f}% vs Seuil ({threshold_val * 100:.0f}%)",
+                    delta_color="inverse"
+                )
+
+            with col_res3:
+                st.metric(
+                    label="Seuil Clinique Appliqué",
+                    value=f"{threshold_val:.2f}",
+                    help="Seuil d'action optimisé (Recall = 100% sur cohorte de validation)."
+                )
+
+            # Barre de progression colorée
+            st.write("**Niveau de Risque Gradué :**")
+            st.progress(float(min(max(prob, 0.0), 1.0)))
+
+            # Encadré de Recommandation Médicale
+            if prob >= 0.75:
+                st.markdown(f"""
+                <div class="risk-critical">
+                    <h4>🚨 Alerte : {risk_level}</h4>
+                    <p><strong>Conduite à tenir recommandée :</strong> {recommendation}</p>
+                    <ul>
+                        <li>Hospitalisation ou consultation cardiologique sous 24-48 heures.</li>
+                        <li>Prescription d'une coronarographie diagnostique et dosage des troponines.</li>
+                        <li>Mise en route immédiate d'un protocole anti-ischémique (selon antécédents).</li>
+                    </ul>
+                </div>
+                """, unsafe_allow_html=True)
+            elif prob >= threshold_val:
+                st.markdown(f"""
+                <div class="risk-high">
+                    <h4>⚠️ Attention : {risk_level}</h4>
+                    <p><strong>Conduite à tenir recommandée :</strong> {recommendation}</p>
+                    <ul>
+                        <li>Consultation cardiologique programmée avec échographie cardiaque transthoracique.</li>
+                        <li>Optimisation des thérapeutiques antihypertensives et hypolipémiantes.</li>
+                    </ul>
+                </div>
+                """, unsafe_allow_html=True)
             else:
-                st.success(f"✅ **DIAGNOSTIC : {pred_label.upper()}**")
-            st.write(f"**Classement Clinique :** {risk_level}")
-
-        with col_res2:
-            st.metric(
-                label="Probabilité de Risque Ischémique",
-                value=prob_pct,
-                delta=f"{(prob - threshold_val) * 100:+.1f}% vs Seuil ({threshold_val * 100:.0f}%)",
-                delta_color="inverse"
-            )
-
-        with col_res3:
-            st.metric(
-                label="Seuil Clinique Appliqué",
-                value=f"{threshold_val:.2f}",
-                help="Seuil d'action optimisé (Recall = 100% sur cohorte de validation)."
-            )
-
-        # Barre de progression colorée
-        st.write("**Niveau de Risque Gradué :**")
-        st.progress(float(min(max(prob, 0.0), 1.0)))
-
-        # Encadré de Recommandation Médicale
-        if prob >= 0.75:
-            st.markdown(f"""
-            <div class="risk-critical">
-                <h4>🚨 Alerte : {risk_level}</h4>
-                <p><strong>Conduite à tenir recommandée :</strong> {recommendation}</p>
-                <ul>
-                    <li>Hospitalisation ou consultation cardiologique sous 24-48 heures.</li>
-                    <li>Prescription d'une coronarographie diagnostique et dosage des troponines.</li>
-                    <li>Mise en route immédiate d'un protocole anti-ischémique (selon antécédents).</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-        elif prob >= threshold_val:
-            st.markdown(f"""
-            <div class="risk-high">
-                <h4>⚠️ Attention : {risk_level}</h4>
-                <p><strong>Conduite à tenir recommandée :</strong> {recommendation}</p>
-                <ul>
-                    <li>Consultation cardiologique programmée avec échographie cardiaque transthoracique.</li>
-                    <li>Optimisation des thérapeutiques antihypertensives et hypolipémiantes.</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="risk-safe">
-                <h4>✅ Statut : {risk_level}</h4>
-                <p><strong>Conduite à tenir recommandée :</strong> {recommendation}</p>
-                <ul>
-                    <li>Maintien d'une activité physique aérobie régulière (≥ 150 min/semaine).</li>
-                    <li>Contrôle annuel des constantes hémodynamiques et lipidiques.</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
+                st.markdown(f"""
+                <div class="risk-safe">
+                    <h4>✅ Statut : {risk_level}</h4>
+                    <p><strong>Conduite à tenir recommandée :</strong> {recommendation}</p>
+                    <ul>
+                        <li>Maintien d'une activité physique aérobie régulière (≥ 150 min/semaine).</li>
+                        <li>Contrôle annuel des constantes hémodynamiques et lipidiques.</li>
+                    </ul>
+                </div>
+                """, unsafe_allow_html=True)
 
 
-# ==============================================================================
+    # ==============================================================================
+        except Exception as pred_err:
+            st.error(f'Erreur lors du calcul de l\'évaluation diagnostique : {pred_err}')
+
+
 # ONGLET 2 : DÉPISTAGE PAR COHORTE (BATCH CSV)
 # ==============================================================================
 with tab_batch:
@@ -567,7 +572,7 @@ with tab_batch:
         try:
             batch_df = pd.read_csv(uploaded_file)
             st.write(f"**Données chargées :** {len(batch_df)} patients détectés.")
-            st.dataframe(batch_df.head(), use_container_width=True)
+            st.dataframe(batch_df.head(), width="stretch")
 
             required_cols = [
                 'age', 'gender', 'chestpain', 'restingBP', 'serumcholestrol',
@@ -611,7 +616,7 @@ with tab_batch:
                         with col_c3:
                             st.metric("Patients Indemnes", f"{total_count - positive_count} ({100 - pos_rate:.1f}%)")
 
-                        st.dataframe(eval_df, use_container_width=True)
+                        st.dataframe(eval_df, width="stretch")
 
                         # Bouton d'exportation
                         csv_output = eval_df.to_csv(index=False).encode('utf-8')
@@ -641,7 +646,7 @@ with tab_model:
 
     st.subheader("Comparaison des Modèles lors de la Validation Croisée (5-Fold CV)")
     if model_comp_df is not None:
-        st.dataframe(model_comp_df.style.highlight_max(subset=["Recall_Mean", "F2_Score_Mean", "ROC_AUC_Mean", "Accuracy_Mean"], color="#D4EDDA"), use_container_width=True)
+        st.dataframe(model_comp_df.style.highlight_max(subset=["Recall_Mean", "F2_Score_Mean", "ROC_AUC_Mean", "Accuracy_Mean"], color="#D4EDDA"), width="stretch")
     else:
         st.info("Le fichier `artifacts/model_comparison.csv` n'est pas encore disponible.")
 
@@ -664,3 +669,4 @@ with tab_model:
 
     st.markdown("---")
     st.caption("Développé dans le respect des bonnes pratiques MLOps et du RGPD de santé.")
+

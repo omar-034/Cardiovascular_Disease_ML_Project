@@ -1,7 +1,14 @@
+"""
+Module d'entraînement et de sélection du modèle (Model Trainer).
+Réalise le benchmarking multi-modèles sous validation croisée stratifiée (5-Fold CV),
+l'optimisation clinique du seuil décisionnel (favorisant le Recall/F2),
+et la sérialisation du modèle champion.
+"""
+
 import os
-import sys
 import json
 from dataclasses import dataclass
+from pathlib import Path
 import numpy as np
 import pandas as pd
 
@@ -9,12 +16,11 @@ from sklearn.metrics import (
     accuracy_score,
     precision_score,
     recall_score,
-    f1_score,
     fbeta_score,
     roc_auc_score,
     make_scorer
 )
-from sklearn.model_selection import StratifiedKFold, cross_validate, cross_val_predict, GridSearchCV
+from sklearn.model_selection import StratifiedKFold, cross_validate, cross_val_predict
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier
@@ -24,17 +30,19 @@ from src.exception import CustomException
 from src.logger import logger
 from src.utils import save_object
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 
 @dataclass
 class ModelTrainerConfig:
     """
     Configuration des chemins d'accès pour les artefacts du modèle entraîné.
     """
-    artifacts_dir: str = os.path.join(os.getcwd(), "artifacts")
-    trained_model_file_path: str = os.path.join(os.getcwd(), "artifacts", "model.pkl")
-    model_metrics_file_path: str = os.path.join(os.getcwd(), "artifacts", "metrics.json")
-    model_comparison_file_path: str = os.path.join(os.getcwd(), "artifacts", "model_comparison.csv")
-    decision_threshold_file_path: str = os.path.join(os.getcwd(), "artifacts", "threshold.json")
+    artifacts_dir: str = str(PROJECT_ROOT / "artifacts")
+    trained_model_file_path: str = str(PROJECT_ROOT / "artifacts" / "model.pkl")
+    model_metrics_file_path: str = str(PROJECT_ROOT / "artifacts" / "metrics.json")
+    model_comparison_file_path: str = str(PROJECT_ROOT / "artifacts" / "model_comparison.csv")
+    decision_threshold_file_path: str = str(PROJECT_ROOT / "artifacts" / "threshold.json")
 
 
 class ModelTrainer:

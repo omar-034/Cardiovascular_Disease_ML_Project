@@ -1,9 +1,12 @@
+"""
+Fonctions utilitaires communes pour la sérialisation et le chargement d'objets (modèles, préprocesseurs).
+"""
+
 import os
-import sys
 import pickle
-from pathlib import Path
 from src.exception import CustomException
 from src.logger import logger
+
 
 def save_object(file_path: str, obj: object) -> None:
     """
@@ -48,4 +51,3 @@ def load_object(file_path: str) -> object:
         
     except Exception as e:
         raise CustomException(e)
-

@@ -1,6 +1,12 @@
+"""
+Module de transformation et prétraitement des données (Data Transformation).
+Construit la Pipeline Scikit-Learn anti-fuite combinant l'ingénierie clinique
+(ClinicalFeatureEngineer) et le ColumnTransformer avec RobustScaler, OneHotEncoder et StandardScaler.
+"""
+
 import os
-import sys
 from dataclasses import dataclass
+from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -13,14 +19,16 @@ from src.logger import logger
 from src.utils import save_object
 from src.components.feature_engineering import ClinicalFeatureEngineer
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 
 @dataclass
 class DataTransformationConfig:
     """
     Configuration pour le composant de transformation des données.
     """
-    artifacts_dir: str = os.path.join(os.getcwd(), "artifacts")
-    preprocessor_obj_file_path: str = os.path.join(os.getcwd(), "artifacts", "preprocessor.pkl")
+    artifacts_dir: str = str(PROJECT_ROOT / "artifacts")
+    preprocessor_obj_file_path: str = str(PROJECT_ROOT / "artifacts" / "preprocessor.pkl")
 
 
 class DataTransformation:
