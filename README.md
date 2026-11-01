@@ -1,5 +1,8 @@
 # 🫀 CardioScan AI — Système Expert de Dépistage et Stratification du Risque Cardiovasculaire
 
+[![Projet d'Apprentissage](https://img.shields.io/badge/Projet-Apprentissage%20%2F%20Portfolio%20MLOps-0052CC.svg?style=for-the-badge&logo=gitbook&logoColor=white)]()
+<br>
+
 [![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.4+-F7931E.svg?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.66+-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
@@ -9,7 +12,8 @@
 [![Status](https://img.shields.io/badge/Statut-Production--Ready-6200EA.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/Licence-MIT-blue.svg?style=flat-square)](LICENSE)
 
-> **CardioScan AI** est une solution complète de Machine Learning de qualité médicale et un système d'aide à la décision clinique (SADC) conçu pour le dépistage précoce, la stratification du risque et l'évaluation pronostique des maladies coronariennes et cardiopathies ischémiques à partir de biomarqueurs physiologiques, biologiques et électrocardiographiques d'effort.
+> 🎓 **NOTE DE CADRE — PROJET D'APPRENTISSAGE & PORTFOLIO MLOps**  
+> Ce dépôt constitue un **projet d'apprentissage et de démonstration technique** développé dans un cadre académique et d'auto-formation avancée. Il illustre l'application concrète des meilleures pratiques d'ingénierie logicielle et de **MLOps appliqué à la santé** : pipeline modulaire, prévention stricte des fuites de données (*data leakage*), calibration de seuil décisionnel asymétrique, benchmarking multi-modèles et déploiement d'une application web interactive. Il a vocation pédagogique et ne constitue pas un dispositif médical homologué.
 
 ---
 
@@ -23,7 +27,7 @@
 7. [Structure du Répertoire](#-7-structure-du-répertoire)
 8. [Installation & Démarrage Rapide](#-8-installation--démarrage-rapide)
 9. [Pipelines de Production (CLI)](#-9-pipelines-de-production-cli)
-10. [Éthique, RGPD & Avertissement Réglementaire](#-10-éthique-rgpd--avertissement-réglementaire)
+10. [Éthique, Cadre d'Apprentissage & Avertissement Médical](#-10-éthique-cadre-dapprentissage--avertissement-médical)
 11. [Auteur & Licence](#-11-auteur--licence)
 
 ---
@@ -36,11 +40,15 @@ Les cardiopathies ischémiques demeurent la première cause de mortalité à l'�
 - **Faux Négatif (FN)** : Renvoie au domicile un patient coronarien sévère sans traitement, avec un risque immédiat d'infarctus du myocarde (IDM) ou d'arrêt cardio-circulatoire.
 
 ### Le Dilemme de l'Exactitude Classique
-Dans les applications cliniques, une exactitude globale (*Accuracy*) de 95% est trompeuse si elle masque 5% de faux négatifs mortels. C'est pourquoi **CardioScan AI** a été conçu avec la règle clinique cardinale :
-$$\text{Sensibilité (Recall)} \rightarrow 100\% \quad \text{et optimisation du } F_2\text{-Score}$$
+Dans les applications cliniques, une exactitude globale (*Accuracy*) de 95% est trompeuse si elle masque 5% de faux négatifs mortels. C'est pourquoi **CardioScan AI** est optimisé selon la règle médicale cardinale :
+- Maximisation absolue de la **Sensibilité / Rappel (Recall = 100%)**
+- Optimisation du **F2-Score** (qui quadruple l'importance relative du Rappel par rapport à la Précision)
 
-Le **$F_2$-Score** accorde un poids quatre fois supérieur au Rappel par rapport à la Précision :
-$$F_\beta = (1 + \beta^2) \frac{\text{Précision} \times \text{Rappel}}{(\beta^2 \times \text{Précision}) + \text{Rappel}} \quad \text{avec } \beta = 2$$
+La formule mathématique du $F_2$-Score appliquée au modèle est définie par :
+
+$$
+F_2 = (1 + 2^2) \times \frac{\text{Precision} \times \text{Recall}}{(2^2 \times \text{Precision}) + \text{Recall}} = 5 \times \frac{\text{Precision} \times \text{Recall}}{4 \times \text{Precision} + \text{Recall}}
+$$
 
 ---
 
@@ -51,11 +59,11 @@ Sur le jeu de test indépendant (**Holdout de 20% inviolé**, 200 patients), apr
 | Métrique Clinique | Résultat Modèle Champion | Interprétation Médicale |
 | :--- | :---: | :--- |
 | **Rappel (Recall / Sensibilité)** | **100.0%** | **Zéro faux négatif** : 100% des patients coronariens détectés. |
-| **$F_2$-Score Clinique** | **0.9966** | Équilibre optimal avec priorité absolue accordée à la détection des malades. |
+| **F2-Score Clinique** | **0.9966** | Équilibre optimal avec priorité absolue accordée à la détection des malades. |
 | **ROC-AUC (Aire sous la courbe)** | **0.9999** | Capacité de discrimination quasi-absolue entre sains et pathologiques. |
 | **Exactitude Globale (Accuracy)** | **99.00%** | Taux global de prédictions correctes sur la cohorte d'évaluation. |
 | **Précision Diagnostique** | **98.31%** | Taux extrêmement faible de fausses alertes (spécificité préservée). |
-| **Seuil Décisionnel Dédié ($\theta^*$)** | **0.10** | Seuil calibré par optimisation F2 (vs seuil conventionnel 0.50). |
+| **Seuil Décisionnel Dédié (θ*)** | **0.10** | Seuil calibré par optimisation F2 (vs seuil standard par défaut à 0.50). |
 
 ---
 
@@ -63,7 +71,7 @@ Sur le jeu de test indépendant (**Holdout de 20% inviolé**, 200 patients), apr
 
 Une validation croisée stratifiée à 5 plis (**Stratified 5-Fold Cross-Validation**) a été menée pour comparer 5 architectures d'apprentissage supervisé :
 
-| Rang | Modèle Algorithmique | Recall Moyen | $F_2$-Score Moyen | ROC-AUC Moyen | Accuracy Moyenne | Précision Moyenne |
+| Rang | Modèle Algorithmique | Recall Moyen | F2-Score Moyen | ROC-AUC Moyen | Accuracy Moyenne | Précision Moyenne |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | 🥇 | **HistGradientBoosting** *(Champion)* | **98.49% ± 0.53%** | **0.9807 ± 0.40%** | **0.9950 ± 0.61%** | **97.00%** | **96.47%** |
 | 🥈 | **Random Forest Classifier** | 98.06% ± 1.06% | 0.9755 ± 0.99% | 0.9927 ± 0.67% | 96.25% | 95.62% |
@@ -83,20 +91,44 @@ Une validation croisée stratifiée à 5 plis (**Stratified 5-Fold Cross-Validat
 Le transformateur personnalisé [`ClinicalFeatureEngineer`](src/components/feature_engineering.py) synthétise de nouveaux biomarqueurs validés par la littérature cardiologique :
 
 ### 1. Ratio de Réserve Chronotrope (`hr_reserve_ratio`)
-$$\text{hr\_reserve\_ratio} = \frac{\text{maxheartrate}}{220 - \text{age}}$$
-*Mesure la capacité du cœur à mobiliser son potentiel chronotrope à l'effort maximal. Un ratio effondré (< 0.85) est un prédicteur fort d'insuffisance coronaire.*
+Mesure la capacité du cœur à mobiliser son potentiel chronotrope à l'effort maximal (selon la formule d'Astrand : $\text{FC}_{\max} = 220 - \text{âge}$) :
+
+$$
+\text{HR Reserve Ratio} = \frac{\text{MaxHeartRate}}{220 - \text{Age}}
+$$
+
+*Implémentation Python :*
+```python
+hr_reserve_ratio = maxheartrate / (220 - age)
+```
 
 ### 2. Indice de Charge Ischémique (`ischemia_burden_index`)
-$$\text{ischemia\_burden\_index} = \text{oldpeak} \times \mathbb{I}(\text{exerciseangia} = 1)$$
-*Quantifie la sévérité clinique en combinant l'altération électrique objective (dépression du segment ST en mm) et la symptomatologie subjective (angine induite par l'effort).*
+Quantifie la sévérité clinique en combinant l'altération électrique objective (dépression du segment ST en mm) et la symptomatologie subjective (angine induite par l'effort) :
+
+$$
+\text{Ischemia Burden Index} = \text{Oldpeak} \times \text{ExerciseAngina}
+$$
+
+*Implémentation Python :*
+```python
+ischemia_burden_index = oldpeak * exerciseangia
+```
 
 ### 3. Proxy de Rigidité Artérielle & Surcharge Vasculaire (`vascular_stiffness_proxy`)
-$$\text{vascular\_stiffness\_proxy} = \frac{\text{restingBP} \times \text{age}}{100}$$
-*Estime l'accumulation du stress pariétal artériel combinant la charge hypertensive et le vieillissement vasculaire.*
+Estime l'accumulation du stress pariétal artériel combinant la charge hypertensive et le vieillissement vasculaire :
+
+$$
+\text{Vascular Stiffness Proxy} = \frac{\text{RestingBP} \times \text{Age}}{100}
+$$
+
+*Implémentation Python :*
+```python
+vascular_stiffness_proxy = (restingBP * age) / 100.0
+```
 
 ### 4. Traitement Anti-Fuite du Cholestérol Nul
-- **Observation biologique** : Un taux de `serumcholestrol == 0 mg/dL` est incompatible avec la vie humaine (erreur d'enregistrement ou valeur non renseignée).
-- **Correction** : Remplacement des zéros par `NaN`, puis imputation par la médiane apprise **strictement sur le sous-ensemble d'apprentissage**, prévenant toute fuite d'information.
+- **Observation biologique** : Un taux de `serumcholestrol == 0 mg/dL` est biologiquement aberrant pour un être humain vivant (valeur manquante masquée).
+- **Correction rigoureuse** : Remplacement des zéros par `np.nan`, puis imputation par la médiane apprise **strictement sur le sous-ensemble d'apprentissage (Train)**, garantissant l'absence totale de fuite d'information (*anti-data leakage*).
 
 ---
 
@@ -104,7 +136,7 @@ $$\text{vascular\_stiffness\_proxy} = \frac{\text{restingBP} \times \text{age}}{
 
 Le pipeline de prétraitement est scellé dans un `ColumnTransformer` hermétique :
 
-```
+```text
                                   [ Données Brutes ]
                                           │
                                           ▼
@@ -145,20 +177,20 @@ Le pipeline de prétraitement est scellé dans un `ColumnTransformer` hermétiqu
 
 ## 🖥️ 6. Application Web Clinique Streamlit
 
-L'interface graphique [`app.py`](app.py) offre une expérience ergonomique de niveau professionnel pour les praticiens :
+L'interface graphique interactive [`app.py`](app.py) offre une expérience utilisateur de niveau professionnel :
 
-### Fonctionnalités Principales :
+### Fonctionnalités Clés :
 1. **Évaluation Individuelle en Temps Réel** :
    - Formulaire clinique structuré en 2 volets : *Données Démographiques & Biologiques* vs *Symptomatologie & Épreuve d'Effort*.
    - Calcul interactif immédiat des 3 biomarqueurs dérivés (`hr_reserve_ratio`, `ischemia_burden_index`, `vascular_stiffness_proxy`).
    - Jauge de risque visuelle et recommandation médicale graduée (*Très Faible*, *Vigilance*, *Élevé*, *Urgence Critique*).
 2. **Chargement Rapide de Profils Types (1-Clic)** :
-   - 🟢 **Profil Témoin Sain** : 25 ans, femme, biomarqueurs optimaux.
+   - 🟢 **Profil Témoin Sain** : 25 ans, femme, biomarqueurs physiologiques optimaux.
    - 🟡 **Profil à Risque Modéré** : 55 ans, homme, anomalies légères de l'onde ST.
    - 🔴 **Profil Ischémique Critique** : 76 ans, homme, angine d'effort, dépression ST 3.2 mm, 2 vaisseaux atteints.
 3. **Dépistage par Cohorte (Batch CSV)** :
    - Téléversement d'un fichier CSV multi-patients.
-   - Modèle CSV d'exemple téléchargeable en 1 clic.
+   - Modèle CSV d'exemple téléchargeable directement depuis l'application.
    - Inférence vectorisée, statistiques d'incidence de cohorte et export du rapport CSV enrichi.
 4. **Gouvernance & Auditabilité du Modèle** :
    - Tableau comparatif complet de la validation croisée 5-Fold.
@@ -170,7 +202,7 @@ L'interface graphique [`app.py`](app.py) offre une expérience ergonomique de ni
 
 ```text
 Cardiovascular Disease/
-├── artifacts/                           # Modèles, préprocesseurs et métriques sérialisés
+├── artifacts/                           # Modèles, préprocesseurs et métriques sérialisés (non trackés)
 │   ├── model.pkl                        # Modèle champion HistGradientBoosting sérialisé
 │   ├── preprocessor.pkl                 # Pipeline scikit-learn complète scellée
 │   ├── threshold.json                   # Seuil clinique calibré (θ* = 0.10)
@@ -191,7 +223,7 @@ Cardiovascular Disease/
 │   ├── __init__.py                      # Package source
 │   ├── exception.py                     # Gestion unifiée des exceptions enrichies
 │   ├── logger.py                        # Journalisation horodatée fichier + console
-│   ├── utils.py                         # Utilitaires de sérialisation pickle sécurisés
+│   ├── utils.py                         # Utilitaires de sérialisation pickle
 │   ├── components/
 │   │   ├── __init__.py
 │   │   ├── data_ingestion.py            # Phase 2 : Découpage stratifié 80/20 anti-fuite
@@ -263,10 +295,11 @@ python -m src.pipeline.predict_pipeline
 
 ---
 
-## ⚖️ 10. Éthique, RGPD & Avertissement Réglementaire
+## ⚖️ 10. Éthique, Cadre d'Apprentissage & Avertissement Médical
 
-- **Secret Médical & RGPD** : Le système fonctionne en local sans téléversement des données de santé vers des serveurs tiers. L'identifiant patient (`patientid`) est rigoureusement exclu de la modélisation pour garantir la pseudonymisation.
-- **Système d'Aide à la Décision Clinique (SADC)** : Cette application est un outil d'assistance au triage diagnostique destiné aux professionnels de santé. Elle ne dispense pas de la réalisation d'une coronarographie, d'une échocardiographie ou de l'évaluation clinique directe par un médecin cardiologue.
+- 🎓 **Nature Pédagogique du Projet** : Ce projet est développé dans un cadre strict d'**apprentissage, de recherche et de portfolio technique**. Il vise à démontrer la maîtrise de l'ensemble du cycle de vie MLOps (Data Engineering, Modeling, Evaluation, Deployment).
+- 🏥 **Non-Substitution à l'Avis Médical** : Ce système d'aide à la décision clinique (SADC) est un prototype algorithmique d'apprentissage. **Il ne constitue pas un dispositif médical certifié (CE/FDA) et ne doit en aucun cas être utilisé pour établir un diagnostic médical en situation clinique réelle.** Tout diagnostic de maladie coronarienne exige une évaluation clinique par un médecin cardiologue et des examens de référence (coronarographie, échographie, scintigraphie).
+- 🔒 **Protection des Données & RGPD** : Le traitement s'effectue intégralement en local sans transmission de données de santé vers des serveurs externes. L'identifiant patient (`patientid`) est rigoureusement exclu de la modélisation pour respecter le principe de minimisation des données.
 
 ---
 
